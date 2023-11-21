@@ -1,9 +1,21 @@
 const User = require("../models/user");
+const jwt = require("jsonwebtoken");
 
 async function login(req,res) {
     try {
+
+        const expirationTime = 1000*60*60*24*7;
+        const privateKey = process.env.JWTPASSWORD;
+        const payload = {
+            email:req.body.email
+        }
+        const options = {
+            expiresIn: expirationTime
+        }
+        const token = await jwt.sign(payload, privateKey, options)
+        console.log(token);
         res.status(200).json({
-            message: "User logged in", user: req.body.email
+            message: "User logged in", user: req.body.email, token: token
         })
     } catch (error) {
         res.status(500).json({message: "Login unsuccessful - please try again", errorMessage:error.message})
@@ -14,7 +26,17 @@ async function login(req,res) {
 async function register(req,res) {
     try {
         const userResponse = await User.create(req.body);
-        res.status(201).json({message: "User successfully added", details: userResponse})
+        const expirationTime = 1000*60*60*24*7;
+        const privateKey = process.env.JWTPASSWORD;
+        const payload = {
+            email:req.body.email
+        }
+        const options = {
+            expiresIn: expirationTime
+        }
+        const token = await jwt.sign(payload, privateKey, options)
+        console.log(token);
+        res.status(201).json({message: "User successfully added", details: userResponse, token: token})
     } catch (error) {
         res.status(500).json({message: "Unable to register user", errorMessage:error.message})
         console.log(error);
